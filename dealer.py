@@ -55,11 +55,13 @@ def sample_deck_distribution(deck: list[int], sample_size: int) -> list[int]:
             deck[value] -= 1
             # add card to deck
             sample.append(value)
+    
+    return sample
 
 # shuffle the generated deck
 def shuffle_deck(deck: list[int]) -> list[int]:
     # deck basis (13 card types, 4 each in base)
-    shuffled_deck = sample_deck_distribution(deck, len(deck))
+    shuffled_deck = sample_deck_distribution(deck, 52)
     
     # deck is shuffled
     return shuffled_deck
