@@ -89,7 +89,7 @@ def blackjack_sum(hand: list[int]) -> int:
     return hand_sum
 
 # TODO: add support for attendant to run Final games, or split to own class
-# status code 5 is loser
+# status code 4 is loser
 def loser(winning_hand: list[int], wager: float) -> list[list[int], float, int]:
     return [winning_hand, -1.0 * wager, 4]
 
@@ -97,7 +97,7 @@ def loser(winning_hand: list[int], wager: float) -> list[list[int], float, int]:
 def winner(player_hand: list[int], wager: float) -> list[list[int], float, int]:
     return [player_hand, 1.5 * wager, 5]
 
-# status code 5 is a draw, lose nothing
+# status code 6 is a draw, lose nothing
 def draw(player_hand: list[int], wager: float) -> list[list[int], float, int]:
     return [player_hand, 0.0 * wager, 6]
 
@@ -120,7 +120,7 @@ def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
     # DEBUG
     print("Initial decks:")
     print("Player hand: ", player_hand)
-    print("Player sum ", blackjack_sum(player_hand))
+    print("Player sum: ", blackjack_sum(player_hand))
     print("House hand: ", house_hand)
     print("House sum: ", blackjack_sum(house_hand), '\n')
 
@@ -135,6 +135,7 @@ def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
         if state == 1:
             action_status = secrets.choice(range(7,10))
             if action_status == 9:
+                # DEBUG
                 print("DOUBLE\n")
                 wager = wager * 2
                 [shoe, player_hand] = draw_card(shoe, player_hand)
@@ -147,8 +148,10 @@ def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
             # pick hit or stand
             action_status = secrets.choice(range(7,9))
             if action_status == 7:
+                # DEBUG
                 print("HIT\n")
                 [shoe, player_hand] = draw_card(shoe, player_hand)
+            # DEBUG
             else:
                 print("STAND\n")
 
@@ -163,11 +166,14 @@ def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
         house_sum = blackjack_sum(house_hand)
         player_sum = blackjack_sum(player_hand)
 
+        # DEBUG
         print("State {} decks:".format(state))
         print("Player hand: ", player_hand)
         print("Player sum ", player_sum)
+        print("Player status ", player_status)
         print("House hand: ", house_hand)
-        print("House sum: ", house_sum, '\n')
+        print("House sum: ", house_sum, )
+        print("House status ", house_status, '\n')
 
         # house hand is playable
         if house_status == 0:

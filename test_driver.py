@@ -13,30 +13,33 @@ shoe = dealer.draw_shoe(shuffled_deck)
 print("Shoe")
 print(shoe, '\n')
 
-# play a game of blackjack
 # base wager as a decimal float
 balance = 1000.00
 wager = 10.00
-result = attendant.basic_game(shoe, wager)
-print(result, '\n')
-[winning_hand, wager_outcome, status] = result
-balance += wager_outcome
 
-# loss
-if status == 4:
-    print("You lose!")
-    print("House hand:")
-    print(winning_hand)
-    print("Balance: {}".format(balance))
-# win
-elif status == 5:
-    print("You win!")
-    print("Player hand:")
-    print(winning_hand)
-    print("Balance: {}".format(balance))
-# draw
-else:
-    print("It's a draw...")
-    print("Player hand:")
-    print(winning_hand)
-    print("Balance: {}".format(balance))
+# play some games of blackjack
+for game in range(100):
+    print("Game #{}".format(game))
+    result = attendant.basic_game(shoe, wager)
+    # print(result, '\n')
+    [winning_hand, wager_outcome, status] = result
+    balance += wager_outcome
+
+    # loss
+    if status == 4:
+        print("You lose!")
+        # print("House hand:")
+        # print(winning_hand)
+        print("Balance: {}\n".format(balance))
+    # win
+    elif status == 5:
+        print("You win!")
+        # print("Player hand:")
+        # print(winning_hand)
+        print("Balance: {}\n".format(balance))
+    # draw
+    else:
+        print("It's a draw...")
+        # print("Player hand:")
+        # print(winning_hand)
+        print("Balance: {}\n".format(balance))
