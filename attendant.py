@@ -168,12 +168,12 @@ def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
 
         # DEBUG
         print("State {} decks:".format(state))
-        print("Player hand: ", player_hand)
-        print("Player sum ", player_sum)
-        print("Player status ", player_status)
-        print("House hand: ", house_hand)
-        print("House sum: ", house_sum, )
-        print("House status ", house_status, '\n')
+        print("Player hand:", player_hand)
+        print("Player sum:", player_sum)
+        print("Player status", player_status)
+        print("House hand:", house_hand)
+        print("House sum:", house_sum, )
+        print("House status:", house_status, '\n')
 
         # house hand is playable
         if house_status == 0:
