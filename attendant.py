@@ -117,12 +117,12 @@ def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
         [shoe, player_hand] = draw_card(shoe, player_hand)
         [shoe, house_hand] = draw_card(shoe, house_hand)
 
-    # DEBUG
-    print("Initial decks:")
-    print("Player hand: ", player_hand)
-    print("Player sum: ", blackjack_sum(player_hand))
-    print("House hand: ", house_hand)
-    print("House sum: ", blackjack_sum(house_hand), '\n')
+    # # DEBUG
+    # print("Initial decks:")
+    # print("Player hand: ", player_hand)
+    # print("Player sum: ", blackjack_sum(player_hand))
+    # print("House hand: ", house_hand)
+    # print("House sum: ", blackjack_sum(house_hand), '\n')
 
     # keep track of game state
     state = 0
@@ -135,8 +135,9 @@ def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
         if state == 1:
             action_status = secrets.choice(range(7,10))
             if action_status == 9:
-                # DEBUG
-                print("DOUBLE\n")
+                # # DEBUG
+                # print("DOUBLE\n")
+
                 wager = wager * 2
                 [shoe, player_hand] = draw_card(shoe, player_hand)
         
@@ -148,12 +149,13 @@ def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
             # pick hit or stand
             action_status = secrets.choice(range(7,9))
             if action_status == 7:
-                # DEBUG
-                print("HIT\n")
+                # # DEBUG
+                # print("HIT\n")
+
                 [shoe, player_hand] = draw_card(shoe, player_hand)
-            # DEBUG
-            else:
-                print("STAND\n")
+            # # DEBUG
+            # else:
+            #     print("STAND\n")
 
         # house draw
         [shoe, house_hand] = draw_card(shoe, house_hand)
@@ -166,14 +168,14 @@ def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
         house_sum = blackjack_sum(house_hand)
         player_sum = blackjack_sum(player_hand)
 
-        # DEBUG
-        print("State {} decks:".format(state))
-        print("Player hand:", player_hand)
-        print("Player sum:", player_sum)
-        print("Player status", player_status)
-        print("House hand:", house_hand)
-        print("House sum:", house_sum, )
-        print("House status:", house_status, '\n')
+        # # DEBUG
+        # print("State {} decks:".format(state))
+        # print("Player hand:", player_hand)
+        # print("Player sum:", player_sum)
+        # print("Player status", player_status)
+        # print("House hand:", house_hand)
+        # print("House sum:", house_sum, )
+        # print("House status:", house_status, '\n')
 
         # house hand is playable
         if house_status == 0:
