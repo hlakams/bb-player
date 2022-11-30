@@ -118,3 +118,11 @@ def ccount(name: str, value: int) -> float:
         return halves_dict.get(value)
     elif name == "uston":
         return uston_dict.get(value)
+
+def ccount_action(state: int, count: float):
+    if state == 1 and count > (2):
+        return 9
+    elif count > 0:
+        return 7
+    else:
+        return 8
