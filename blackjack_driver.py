@@ -3,12 +3,6 @@ import dealer
 import attendant
 import benchmark
 
-# initialize deck
-deck = dealer.generate_deck_distribution()
-# # DEBUG
-# print("Deck:")
-# print(deck, '\n')
-
 # # FINAL
 # # real agents in test
 names = ["bb", "random", "hi_lo", "ko", "zen", "ten", "halves", "uston"]
@@ -25,7 +19,13 @@ for batch_no in range(batch_runs):
     # new batch
     batch_no += 1
     
-    # 
+    # initialize deck
+    deck = dealer.generate_deck_distribution()
+    # # DEBUG
+    # print("Deck:")
+    # print(deck, '\n')
+
+    # play X# games with a stable deck
     for name_idx, name in enumerate(names):
         # base wager as a decimal float
         balance = 1000.00
