@@ -1,6 +1,7 @@
 # module imports - all other imports done there
 import dealer
 import attendant
+import benchmark
 
 # initialize deck
 deck = dealer.generate_deck_distribution()
@@ -8,11 +9,8 @@ deck = dealer.generate_deck_distribution()
 # print("Deck:")
 # print(deck, '\n')
 
-# # DEBUG
-# # stochastic agents in test
-# debug_name = ["random", "hi_lo", "ko", "zen", "ten", "halves", "uston"]
-
-# real agents in test
+# # FINAL
+# # real agents in test
 names = ["bb", "random", "hi_lo", "ko", "zen", "ten", "halves", "uston"]
 
 # maintain running count of results
@@ -93,25 +91,10 @@ for batch_no in range(batch_runs):
         # print("Final balance: {}".format(balance))
 
         # store result
-        batch_result = [name, games, wins, losses, draws, win_likelhood, balance]
+        current_result = [name, games, wins, losses, draws, win_likelhood, balance]
         # previous (running) result
         previous_result = results[name_idx]
 
-        results[name_idx] = [
-            # name
-            name,
-            # games
-            previous_result[1] + games,
-            # wins
-            previous_result[2] + wins,
-            # losses
-            previous_result[3] + losses,
-            # draws
-            previous_result[4] + draws,
-            # win likelihood update
-            attendant.win_likelihood_update(previous_result[5], win_likelhood, batch_no),
-            # new balance
-            balance
-        ]
+        results[name_idx] = benchmark.update_results(previous_result, current_result, batch_no)
 
 print(results)

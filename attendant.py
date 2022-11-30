@@ -1,5 +1,6 @@
 # necessary imports
 import secrets
+import ccount_agent
 
 """
 The attendant draws cards and verifies hands
@@ -20,6 +21,9 @@ action_status -> int
     * 8: stand
     * 9: double
 """
+
+# from main driver, probably should centralize access later
+names = ["bb", "random", "hi_lo", "ko", "zen", "ten", "halves", "uston"]
 
 # the attendant draws blackjack cards
 def draw_card(shoe: list[int], hand: list[int]) -> list[list[int], list[int]]:
@@ -101,13 +105,6 @@ def winner(player_hand: list[int], wager: float) -> list[list[int], float, int]:
 def draw(player_hand: list[int], wager: float) -> list[list[int], float, int]:
     return [player_hand, 0.0 * wager, 6]
 
-# update win likelihood
-def win_likelihood_update(prior: float, current: float, batch_no: int) -> float:
-    if batch_no == 1:
-        return current
-    else:
-        return (((batch_no - 1) * prior + current) / batch_no)
-
 # a basic, proof-of-concept blackjack game that runs for a single round
 # our player plays against the house and randomly selects hit/stand/double
 # returns winning hand (if draw, player's hand) and status for player
@@ -133,6 +130,7 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
 
     # keep track of game state
     state = 0
+    count = 0.0
 
     # game state machine
     while True:
@@ -140,33 +138,81 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
         state += 1
 
         if state == 1:
-            action_status = secrets.choice(range(7,10))
-            if action_status == 9:
-                # # DEBUG
-                # print("DOUBLE\n")
+            # TODO: update this when bb-player is done
+            # check if name is a ccount strategy
+            if name not in names[0:2]:
+                # do preliminary card counting
+                for card in player_hand:
+                    count += ccount_agent.ccount(name, card)
+                for card in house_hand:
+                    count += ccount_agent.ccount(name, card)
 
-                wager = wager * 2
-                [shoe, player_hand] = draw_card(shoe, player_hand)
+                # figure out action
+                action_status = ccount_agent.ccount_action(state, count)
+
+                # action conditionals
+                if action_status == 9:
+                    # # DEBUG
+                    # print("DOUBLE\n")
+
+                    # double the wager
+                    wager = wager * 2
+                    # draw new card and count it
+                    [shoe, player_hand] = draw_card(shoe, player_hand)
+                    count += ccount_agent.ccount(name, player_hand[-1])
+                elif action_status == 7:
+                    # draw new card and count it
+                    [shoe, player_hand] = draw_card(shoe, player_hand)
+                    count += ccount_agent.ccount(name, player_hand[-1])
+
+            # TODO: move bb-player to own condition
+            # random agent
+            else:
+                action_status = secrets.choice(range(7,10))
+                if action_status == 9:
+                    # # DEBUG
+                    # print("DOUBLE\n")
+
+                    wager = wager * 2
+                    [shoe, player_hand] = draw_card(shoe, player_hand)
         
         # decide if player will draw or not
-        if action_status == 7:
+        elif state != 1 and action_status == 7:
             # TODO: have player agent heuristic decide plan
             # TODO: card counting strategies for benchmark
             # TODO: base deck manipulation
-            # pick hit or stand
-            action_status = secrets.choice(range(7,9))
-            if action_status == 7:
-                # # DEBUG
-                # print("HIT\n")
+            # TODO: new card count
+            # check if name is a ccount strategy
+            if name not in names[0:2]:
+                # update card count with the new house card
+                count += ccount_agent.ccount(name, card)
 
-                [shoe, player_hand] = draw_card(shoe, player_hand)
-            # # DEBUG
-            # else:
-            #     print("STAND\n")
+                # figure out action
+                action_status = ccount_agent.ccount_action(state, count)
+
+                # action conditionals
+                if action_status == 7:
+                    # # DEBUG
+                    # print("DOUBLE\n")
+
+                    # draw new card and count it
+                    [shoe, player_hand] = draw_card(shoe, player_hand)
+                    count += ccount_agent.ccount(name, player_hand[-1])
+            # TODO: move bb-player to own strategy
+            else:
+                # pick hit or stand
+                action_status = secrets.choice(range(7,9))
+                if action_status == 7:
+                    # # DEBUG
+                    # print("HIT\n")
+
+                    [shoe, player_hand] = draw_card(shoe, player_hand)
+                # # DEBUG
+                # else:
+                #     print("STAND\n")
 
         # house draw
         [shoe, house_hand] = draw_card(shoe, house_hand)
-
 
         # get game state status
         house_status = verify(house_hand)

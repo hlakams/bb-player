@@ -120,7 +120,7 @@ def ccount(name: str, value: int) -> float:
         return uston_dict.get(value)
 
 def ccount_action(state: int, count: float):
-    if state == 1 and count > (2):
+    if state == 1 and count > (26/4):
         return 9
     elif count > 0:
         return 7
