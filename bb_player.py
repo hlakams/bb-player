@@ -5,30 +5,31 @@ import collections
 from typing import Mapping
 import random
 import math
-
-import attendant
+import benchmark
 
 # Note: we use random here, since secrets does not have a float generator
 
-# TODO: move to attendant class, on access
-# initial distribution (can update)
-# base_distribution = [4 for _ in range(0,13)]
-
-# new state is updated
-states = [x for x in range(0,3)]
+# static access vars (dictionary)
+states = [x for x in range(0,13)]
 sigma = [x for x in range(0,13)]
-transitions = collections.defaultdict(lambda: collections.defaultdict(float))
-emissions = collections.defaultdict(lambda: collections.defaultdict(float))
 
-# initialize transitions matrix with uniform likelihoods
-for prior_state in states:
+def init_transitions() -> Mapping:
+    # use to update new state predictions
+    transitions = collections.defaultdict(lambda: collections.defaultdict(float))
+    # initialize transitions matrix with uniform likelihoods
+    for prior_state in states:
+        for current_state in states:
+            transitions[prior_state][current_state] = 1/len(states)
+    return transitions
+
+def init_emissions() -> Mapping:
+    # use to update new state predictions
+    emissions = collections.defaultdict(lambda: collections.defaultdict(float))
+    # initialize transitions matrix with uniform likelihoods
     for current_state in states:
-        transitions[prior_state][current_state] = 1/len(states)
-
-# initialize transitions matrix with uniform likelihoods
-for current_state in states:
-    for card in sigma:
-        emissions[current_state][card] = random.random()
+        for card in sigma:
+            emissions[current_state][card] = random.random()
+    return emissions
 
 # TODO: move to attendant class
 # # new batches need a new distribution
@@ -45,8 +46,6 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
     if observed in range(0, 4):
         # increment hits
         low = random.randint(0,3)
-        print(base_distribution)
-        print(observed)
         base_distribution[observed] += 1
         base_distribution[low] += 1
 
@@ -96,6 +95,7 @@ def sample_string(distribution: list[int]) -> str:
     # convert set to normal distribution
     mean = np.mean(occurrences)
     stdev = np.std(occurrences)
+    # normal = stats.norm(mean, stdev)
     normal = stats.lognorm(s=stdev, scale=math.exp(mean))
 
     # generate a sample of int values in range [0,13]
@@ -107,20 +107,16 @@ def sample_string(distribution: list[int]) -> str:
     # max 10 values
 
     for value in sample:
-        print(value)
         if value >= 0 and value <= 12:
             output.append(int(value))
         if len(output) == 10:
             break
 
-    # DEBUG
-    print(output)
-
     # done with current sample
     return output
 
 # find most-likely state-sequence appearance, given a sampled sequence
-def maximize_states(x: str) -> str:
+def maximize_states(x: str, transitions: Mapping, emissions) -> str:
     # matrix nodes are [prob, backtrack] for viterbi
     matrix = [[[float('-inf'), 0] for i in range(len(x))] for j in range(len(states))]
 
@@ -144,8 +140,6 @@ def maximize_states(x: str) -> str:
     # get last pointer of maximum likelihood
     max_pointer = max(last_column, key = lambda x:x[0])
 
-    print(last_column)
-
     # utility vars for hidden path
     max_index = last_column.index(max_pointer)
     max_sequence = [states[max_index]]
@@ -158,22 +152,21 @@ def maximize_states(x: str) -> str:
         max_pointer = matrix[max_pointer][ms_idx][1]
 
     # output hidden path
-    print(max_sequence)
     return max_sequence
 
 # TODO: parameter estimation
-def learn_params(hidden_path: str, x: str) -> list[Mapping, Mapping]:
+def learn_params(true_states: str, x: str) -> list[Mapping, Mapping]:
     # declare matrices
     T_update = collections.defaultdict(lambda: collections.defaultdict(float))
     E_update = collections.defaultdict(lambda: collections.defaultdict(float))
         
     # T prior -> current counts
-    for i in range(1, len(hidden_path)):
-        T_update[hidden_path[i - 1]][hidden_path[i]] += 1.0
+    for i in range(1, len(true_states)):
+        T_update[true_states[i - 1]][true_states[i]] += 1.0
 
     # E state-symbol counts
-    for i in range(len(hidden_path)):
-        E_update[hidden_path[i]][x[i]] += 1.0
+    for i in range(len(true_states)):
+        E_update[true_states[i]][x[i]] += 1.0
 
     # new T matrix
     for prior_state in states:
@@ -199,26 +192,55 @@ def learn_params(hidden_path: str, x: str) -> list[Mapping, Mapping]:
             for symbol in sigma:
                 E_update[state][symbol] /= number_transitions
 
-    return [T_update, E_update]
+    return [T_update, E_update, true_states]
 
 # transition, emission probabilities
 def learn_probabilities(transitions: Mapping, emissions: Mapping, distribution: list[int]) -> list:
     # sampled string
     sampled_string = sample_string(distribution)
 
-    # iterative viterbi learning 
-    for x in range(10):
-        state_sequence = maximize_states(sampled_string)
-        print(state_sequence)
-        [transitions, emissions] = learn_params(state_sequence, sampled_string)
+    # iterative viterbi learning
+    # prediction for state likelihoods will converge based on frequency of appearance
+    for _ in range(10):
+        state_sequence = maximize_states(sampled_string, transitions, emissions)
+        [transitions, emissions, true_states] = learn_params(state_sequence, sampled_string)
     
     # done with learning
-    return [transitions, emissions]
+    return [transitions, emissions, true_states, sampled_string]
 
 # TODO: action decision tree search, using probabilities
-def action_tree_step(current_hand: list[int], state: int, distribution: list[int]):
-    [new_transitions, new_emissions] = learn_probabilities(transitions, emissions, distribution)
+def action_tree_step(transitions: Mapping, emissions: Mapping, current_hand: list[int], game_state: int, distribution: list[int]):
+    [new_transitions, new_emissions, true_states, sampled_string] = learn_probabilities(transitions, emissions, distribution)
 
-    # if state == 1:
-    #     moves = [7,8,9]
-    return 7
+    # assumption: incoming action status will always be 7
+    action_status = 7
+
+    # the aggregate probability of state emissions for the current string
+    emissions_probability = 1.0
+    for card_idx, card in enumerate(sampled_string):
+        emissions_probability *= emissions[true_states[card_idx]][card]
+    
+    transitions_probability = 1.0
+    for card_idx, card in enumerate(true_states[0:-1]):
+        transitions_probability *= emissions[card][true_states[card_idx + 1]]
+
+    # add-one smoothing for log ratio
+    et_ratio = np.log((emissions_probability + game_state) / (transitions_probability + game_state))
+    # expectation of distance to transmit to a valid card state per symbol left
+    symbol_distance = (21 - benchmark.blackjack_sum(current_hand)) * abs(et_ratio)
+
+    # posssible_actions: 7, 8, 9
+    if game_state == 1:
+        if symbol_distance >= 0 and symbol_distance <= 1:
+            action_status = 9
+        elif symbol_distance > 1 and symbol_distance <= 1.5:
+            action_status = 8
+        else:
+            action_status = 7
+    else:
+        if symbol_distance >= 0 and symbol_distance <= 1:
+            action_status = 8
+        else:
+            action_status = 7
+
+    return [action_status, new_transitions, new_emissions]

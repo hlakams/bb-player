@@ -2,6 +2,7 @@
 import dealer
 import attendant
 import benchmark
+import bb_player
 
 # # FINAL
 # # real agents in test
@@ -18,7 +19,7 @@ batch_runs = 10
 for batch_no in range(batch_runs):
     # new batch
     batch_no += 1
-    
+
     # initialize deck
     deck = dealer.generate_deck_distribution()
     # # DEBUG
@@ -36,6 +37,10 @@ for batch_no in range(batch_runs):
         losses = 0
         draws = 0
         games = 100
+
+        if name == "bb":
+            benchmark.transitions = bb_player.init_transitions()
+            benchmark.emissions = bb_player.init_emissions()
 
         for game in range(games):
             # current game initialization

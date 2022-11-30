@@ -1,6 +1,7 @@
 # necessary imports
 import secrets
 import ccount_agent
+import benchmark
 import bb_player
 
 """
@@ -41,7 +42,7 @@ def draw_card(shoe: list[int], hand: list[int]) -> list[list[int], list[int]]:
 # return a hand's status
 def verify(hand: list[int]) -> int:
     # check hand's sum
-    hand_sum = blackjack_sum(hand)
+    hand_sum = benchmark.blackjack_sum(hand)
 
     # check if hand is valid
     if hand_sum > 21:
@@ -63,35 +64,6 @@ def verify(hand: list[int]) -> int:
     
     # card status settled
     return status
-
-def blackjack_sum(hand: list[int]) -> int:
-    # indexing starts from 0 (ace)
-    # face cards are indexed at value - 1
-    # court cards are indices 10 - 12, value 10
-    blackjack_dict = dict([
-        (0, 1),
-        (1, 2),
-        (2, 3),
-        (3, 4),
-        (4, 5),
-        (5, 6),
-        (6, 7),
-        (7, 8),
-        (8, 9),
-        (9, 10),
-        (10, 10),
-        (11, 10),
-        (12, 10)
-    ])
-    # running sum
-    hand_sum = 0
-
-    # iterate over all cards
-    for card in hand:
-        hand_sum += blackjack_dict.get(card)
-    
-    # done with sum
-    return hand_sum
 
 # TODO: add support for attendant to run Final games, or split to own class
 # status code 4 is loser
@@ -133,6 +105,9 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
     state = 0
     count = 0.0
     base_distribution = [4 for _ in range(13)]
+
+    transitions = benchmark.transitions
+    emissions = benchmark.emissions
 
     # game state machine
     while True:
@@ -185,7 +160,7 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                 for card in house_hand:
                     base_distribution = bb_player.update_distribution(base_distribution, card)
                 
-                action_status = bb_player.action_tree_step(player_hand, state, base_distribution)
+                [action_status, transitions, emissions] = bb_player.action_tree_step(transitions, emissions, player_hand, state, base_distribution)
 
                 if action_status == 9:
                     # # DEBUG
@@ -233,7 +208,7 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                 # else:
                 #     print("STAND\n")
             elif name == names[0]:
-                action_status = bb_player.action_tree_step(player_hand, state, base_distribution)
+                [action_status, transitions, emissions] = bb_player.action_tree_step(transitions, emissions, player_hand, state, base_distribution)
 
                 if action_status == 7:
                     [shoe, player_hand] = draw_card(shoe, player_hand)
@@ -246,8 +221,8 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
         house_status = verify(house_hand)
         player_status = verify(player_hand)
         # get hand sums
-        house_sum = blackjack_sum(house_hand)
-        player_sum = blackjack_sum(player_hand)
+        house_sum = benchmark.blackjack_sum(house_hand)
+        player_sum = benchmark.blackjack_sum(player_hand)
 
         # # DEBUG
         # print("State {} decks:".format(state))
