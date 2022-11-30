@@ -31,8 +31,7 @@ def init_emissions() -> Mapping:
             emissions[current_state][card] = random.random()
     return emissions
 
-# TODO: move to attendant class
-# # new batches need a new distribution
+# new batches need a new distribution
 def reset_base(base_distribution):
     # initial observation
     base_distribution = [4 for _ in range(0,13)]
@@ -81,7 +80,7 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
     
     return base_distribution
 
-# TODO: integrate sample to feed into Viterbi as X
+# integrate sample to feed into Viterbi
 # sample a string from a normalized distribution - "gaussian filter"
 def sample_string(distribution: list[int]) -> str:
     # convert base distribution to a set of values
@@ -154,7 +153,7 @@ def maximize_states(x: str, transitions: Mapping, emissions) -> str:
     # output hidden path
     return max_sequence
 
-# TODO: parameter estimation
+# estimating parameters (emission, transmission)
 def learn_params(true_states: str, x: str) -> list[Mapping, Mapping]:
     # declare matrices
     T_update = collections.defaultdict(lambda: collections.defaultdict(float))
@@ -208,7 +207,7 @@ def learn_probabilities(transitions: Mapping, emissions: Mapping, distribution: 
     # done with learning
     return [transitions, emissions, true_states, sampled_string]
 
-# TODO: action decision tree search, using probabilities
+# action trees
 def action_tree_step(transitions: Mapping, emissions: Mapping, current_hand: list[int], game_state: int, distribution: list[int]):
     [new_transitions, new_emissions, true_states, sampled_string] = learn_probabilities(transitions, emissions, distribution)
 

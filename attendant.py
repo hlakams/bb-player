@@ -65,7 +65,6 @@ def verify(hand: list[int]) -> int:
     # card status settled
     return status
 
-# TODO: add support for attendant to run Final games, or split to own class
 # status code 4 is loser
 def loser(winning_hand: list[int], wager: float) -> list[list[int], float, int]:
     return [winning_hand, -1.0 * wager, 4]
@@ -94,18 +93,11 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
         [shoe, player_hand] = draw_card(shoe, player_hand)
         [shoe, house_hand] = draw_card(shoe, house_hand)
 
-    # # DEBUG
-    # print("Initial decks:")
-    # print("Player hand: ", player_hand)
-    # print("Player sum: ", blackjack_sum(player_hand))
-    # print("House hand: ", house_hand)
-    # print("House sum: ", blackjack_sum(house_hand), '\n')
-
     # keep track of game state
     state = 0
     count = 0.0
     base_distribution = [4 for _ in range(13)]
-
+    # for bb-agent
     transitions = benchmark.transitions
     emissions = benchmark.emissions
 
@@ -113,9 +105,9 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
     while True:
         # new state
         state += 1
-
+        
+        # post-initial
         if state == 1:
-            # TODO: update this when bb-player is done
             # check if name is a ccount strategy
             if name not in names[0:2]:
                 # do preliminary card counting
@@ -128,15 +120,13 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                 action_status = ccount_agent.ccount_action(state, count)
 
                 # action conditionals
-                if action_status == 9:
-                    # # DEBUG
-                    # print("DOUBLE\n")
-
-                    # double the wager
+                # double the wager
+                if action_status == 9:    
                     wager = wager * 2
                     # draw new card and count it
                     [shoe, player_hand] = draw_card(shoe, player_hand)
                     count += ccount_agent.ccount(name, player_hand[-1])
+                # hit
                 elif action_status == 7:
                     # draw new card and count it
                     [shoe, player_hand] = draw_card(shoe, player_hand)
@@ -147,8 +137,6 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
             elif name == names[1]:
                 action_status = secrets.choice(range(7,10))
                 if action_status == 9:
-                    # # DEBUG
-                    # print("DOUBLE\n")
 
                     wager = wager * 2
                     [shoe, player_hand] = draw_card(shoe, player_hand)
@@ -162,23 +150,18 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                 
                 [action_status, transitions, emissions] = bb_player.action_tree_step(transitions, emissions, player_hand, state, base_distribution)
 
+                # double
                 if action_status == 9:
-                    # # DEBUG
-                    # print("DOUBLE\n")
-
                     wager = wager * 2
                     [shoe, player_hand] = draw_card(shoe, player_hand)
                     base_distribution = bb_player.update_distribution(base_distribution, player_hand[-1])
-                if action_status == 7:
+                # hit
+                elif action_status == 7:
                     [shoe, player_hand] = draw_card(shoe, player_hand)
                     base_distribution = bb_player.update_distribution(base_distribution, player_hand[-1])
         
         # decide if player will draw or not
         elif state != 1 and action_status == 7:
-            # TODO: have player agent heuristic decide plan
-            # TODO: card counting strategies for benchmark
-            # TODO: base deck manipulation
-            # TODO: new card count
             # check if name is a ccount strategy
             if name not in names[0:2]:
                 # update card count with the new house card
@@ -189,10 +172,6 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
 
                 # action conditionals
                 if action_status == 7:
-                    # # DEBUG
-                    # print("DOUBLE\n")
-
-                    # draw new card and count it
                     [shoe, player_hand] = draw_card(shoe, player_hand)
                     count += ccount_agent.ccount(name, player_hand[-1])
             # TODO: move bb-player to own strategy
@@ -200,13 +179,9 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                 # pick hit or stand
                 action_status = secrets.choice(range(7,9))
                 if action_status == 7:
-                    # # DEBUG
-                    # print("HIT\n")
-
                     [shoe, player_hand] = draw_card(shoe, player_hand)
-                # # DEBUG
-                # else:
-                #     print("STAND\n")
+
+
             elif name == names[0]:
                 [action_status, transitions, emissions] = bb_player.action_tree_step(transitions, emissions, player_hand, state, base_distribution)
 
@@ -223,15 +198,6 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
         # get hand sums
         house_sum = benchmark.blackjack_sum(house_hand)
         player_sum = benchmark.blackjack_sum(player_hand)
-
-        # # DEBUG
-        # print("State {} decks:".format(state))
-        # print("Player hand:", player_hand)
-        # print("Player sum:", player_sum)
-        # print("Player status", player_status)
-        # print("House hand:", house_hand)
-        # print("House sum:", house_sum, )
-        # print("House status:", house_status, '\n')
 
         # house hand is playable
         if house_status == 0:

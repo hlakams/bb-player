@@ -45,10 +45,6 @@ def sample_deck_distribution(deck: list[int], sample_size: int) -> list[int]:
     for value in deck:
         deck_copy.append(value)
 
-    # # DEBUG
-    # print(sum(deck))
-    # print(sample_size)
-
     # error boundary check: make sure sample size valid
     if sum(deck) < sample_size:
         print("Error: sample size exceeds deck size!")

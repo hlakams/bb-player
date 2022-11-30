@@ -22,9 +22,6 @@ for batch_no in range(batch_runs):
 
     # initialize deck
     deck = dealer.generate_deck_distribution()
-    # # DEBUG
-    # print("Deck:")
-    # print(deck, '\n')
 
     # play X# games with a stable deck
     for name_idx, name in enumerate(names):
@@ -43,57 +40,27 @@ for batch_no in range(batch_runs):
             benchmark.emissions = bb_player.init_emissions()
 
         for game in range(games):
-            # current game initialization
-            # # DEBUG
-            # print("Game #{}".format(game))
             shuffled_deck = dealer.shuffle_deck(deck)
-            # # DEBUG
-            # print("Shuffled deck:")
-            # print(shuffled_deck, '\n')
+
             shoe = dealer.draw_shoe(shuffled_deck)
-            # # DEBUG
-            # print("Shoe")
-            # print(shoe, '\n')
+
             result = attendant.basic_game(shoe, wager, name)
-            # print(result, '\n')
+
             [winning_hand, wager_outcome, status] = result
             balance += wager_outcome
 
             # loss
             if status == 4:
                 losses += 1
-                # DEBUG
-                # print("You lose!")
-                # print("House hand:")
-                # print(winning_hand)
-                # print("Balance: {}\n".format(balance))
             # win
             elif status == 5:
                 wins += 1
-                # DEBUG
-                # print("You win!")
-                # print("Player hand:")
-                # print(winning_hand)
-                # print("Balance: {}\n".format(balance))
             # draw
             else:
                 draws += 1
-                # print("It's a draw...")
-                # print("Player hand:")
-                # print(winning_hand)
-                # print("Balance: {}\n".format(balance))
 
         # calculate win likelihood
         win_likelhood = (2 * wins + draws) / (2 * games)
-
-        # # final results per bulk game run
-        # print("End results for {} agent:\n".format(name))
-        # print("Games: {}".format(games))
-        # print("Wins: {}".format(wins))
-        # print("Losses: {}".format(losses))
-        # print("Draws: {}".format(draws))
-        # print("Final win likelihood: {}".format(win_likelhood))
-        # print("Final balance: {}".format(balance))
 
         # store result
         current_result = [name, games, wins, losses, draws, win_likelhood, balance]
