@@ -1,6 +1,7 @@
 # necessary imports
 import secrets
 import ccount_agent
+import bb_player
 
 """
 The attendant draws cards and verifies hands
@@ -131,6 +132,7 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
     # keep track of game state
     state = 0
     count = 0.0
+    base_distribution = [4 for _ in range(13)]
 
     # game state machine
     while True:
@@ -167,7 +169,7 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
 
             # TODO: move bb-player to own condition
             # random agent
-            else:
+            elif name == names[1]:
                 action_status = secrets.choice(range(7,10))
                 if action_status == 9:
                     # # DEBUG
@@ -175,6 +177,26 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
 
                     wager = wager * 2
                     [shoe, player_hand] = draw_card(shoe, player_hand)
+                if action_status == 7:
+                    [shoe, player_hand] = draw_card(shoe, player_hand)
+            elif name == names[0]:
+                for card in player_hand:
+                    base_distribution = bb_player.update_distribution(base_distribution, card)
+                for card in house_hand:
+                    base_distribution = bb_player.update_distribution(base_distribution, card)
+                
+                action_status = bb_player.action_tree_step(player_hand, state, base_distribution)
+
+                if action_status == 9:
+                    # # DEBUG
+                    # print("DOUBLE\n")
+
+                    wager = wager * 2
+                    [shoe, player_hand] = draw_card(shoe, player_hand)
+                    base_distribution = bb_player.update_distribution(base_distribution, player_hand[-1])
+                if action_status == 7:
+                    [shoe, player_hand] = draw_card(shoe, player_hand)
+                    base_distribution = bb_player.update_distribution(base_distribution, player_hand[-1])
         
         # decide if player will draw or not
         elif state != 1 and action_status == 7:
@@ -199,7 +221,7 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                     [shoe, player_hand] = draw_card(shoe, player_hand)
                     count += ccount_agent.ccount(name, player_hand[-1])
             # TODO: move bb-player to own strategy
-            else:
+            elif name == names[1]:
                 # pick hit or stand
                 action_status = secrets.choice(range(7,9))
                 if action_status == 7:
@@ -210,6 +232,12 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                 # # DEBUG
                 # else:
                 #     print("STAND\n")
+            elif name == names[0]:
+                action_status = bb_player.action_tree_step(player_hand, state, base_distribution)
+
+                if action_status == 7:
+                    [shoe, player_hand] = draw_card(shoe, player_hand)
+                    base_distribution = bb_player.update_distribution(base_distribution, player_hand[-1])
 
         # house draw
         [shoe, house_hand] = draw_card(shoe, house_hand)
