@@ -101,10 +101,17 @@ def winner(player_hand: list[int], wager: float) -> list[list[int], float, int]:
 def draw(player_hand: list[int], wager: float) -> list[list[int], float, int]:
     return [player_hand, 0.0 * wager, 6]
 
+# update win likelihood
+def win_likelihood_update(prior: float, current: float, batch_no: int) -> float:
+    if batch_no == 1:
+        return current
+    else:
+        return (((batch_no - 1) * prior + current) / batch_no)
+
 # a basic, proof-of-concept blackjack game that runs for a single round
 # our player plays against the house and randomly selects hit/stand/double
 # returns winning hand (if draw, player's hand) and status for player
-def basic_game(shoe: list[int], wager: float) -> list[list[int], float, int]:
+def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], float, int]:
     # initialization
     house_hand = []
     player_hand = []

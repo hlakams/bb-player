@@ -41,7 +41,7 @@ for game in range(games):
     # # DEBUG
     # print("Shoe")
     # print(shoe, '\n')
-    result = attendant.basic_game(shoe, wager)
+    result = attendant.basic_game(shoe, wager, name)
     # print(result, '\n')
     [winning_hand, wager_outcome, status] = result
     balance += wager_outcome
