@@ -217,11 +217,11 @@ def action_tree_step(transitions: Mapping, emissions: Mapping, current_hand: lis
     # the aggregate probability of state emissions for the current string
     emissions_probability = 1.0
     for card_idx, card in enumerate(sampled_string):
-        emissions_probability *= emissions[true_states[card_idx]][card]
+        emissions_probability *= new_emissions[true_states[card_idx]][card]
     
     transitions_probability = 1.0
     for card_idx, card in enumerate(true_states[0:-1]):
-        transitions_probability *= emissions[card][true_states[card_idx + 1]]
+        transitions_probability *= new_transitions[card][true_states[card_idx + 1]]
 
     # add-one smoothing for log ratio
     et_ratio = np.log((emissions_probability + game_state) / (transitions_probability + game_state))
