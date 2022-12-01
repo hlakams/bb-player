@@ -215,15 +215,16 @@ def action_tree_step(transitions: Mapping, emissions: Mapping, current_hand: lis
     action_status = 7
 
     # the aggregate probability of state emissions for the current string
-    emissions_probability = 1.0
+    emissions_probability = 0.0
     for card_idx, card in enumerate(sampled_string):
-        emissions_probability *= new_emissions[true_states[card_idx]][card]
+        emissions_probability += new_emissions[true_states[card_idx]][card]
     
-    transitions_probability = 1.0
+    transitions_probability = 0.0
     for card_idx, card in enumerate(true_states[0:-1]):
-        transitions_probability *= new_transitions[card][true_states[card_idx + 1]]
+        transitions_probability += new_transitions[card][true_states[card_idx + 1]]
 
-    # add-one smoothing for log ratio
+    # add-X smoothing for log ratio
+    # we use smoothing to prevent divide-by-zero errors, and this is used for the upcoming state
     et_ratio = np.log((emissions_probability + game_state) / (transitions_probability + game_state))
     # expectation of distance to transmit to a valid card state per symbol left
     symbol_distance = (21 - benchmark.blackjack_sum(current_hand)) * abs(et_ratio)
