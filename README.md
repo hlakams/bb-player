@@ -1,4 +1,4 @@
-# biased-blackjack
+# BB-Player
 A planning method for biased blackjack
 > Harsha Lakamsani and Nicholas Ngo, November 2022
 
