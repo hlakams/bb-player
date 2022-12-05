@@ -5,7 +5,7 @@ A HMM strategy for Blackjack
 # Introduction
 To the lay gambler or even advanced players, card counting is an optimal strategy for blackjack. No sleight of hand: it depends on what you know about the shuffled deck as it's being played. The core heuristic is partially informed and weights specific likelihoods over others. Let's take it one step further. The deck is no longer uniformly distributed. There are still four suits, albeit lacking the guarantee of 13 cards each. Each rank will have at least one card. On top of that, you don't know how many decks are in play. Will your naive strategy still work?
 
-We propose a novel approach to "biased" Blackjack, named "BB-Player." A Hidden Markov Model (HMM) is used a simulator (with possible sampled action sequences) for RL, extracting Bayesian posterior probabilities. Then, this is used an input for an online decision tree. BFS is performed at each level to find the optimal plan.
+We propose a novel approach to "biased" Blackjack, named "BB-Player." A Hidden Markov Model (HMM) is used a simulator (with possible sampled action sequences) for RL, extracting Bayesian posterior probabilities. Then, this is used an input for an online decision tree. BFS is performed at each level to find the optimal action node.
 
 # Methodology and Constraints
 Expanding on the HMM mentioned earlier, we use Viterbi learning through a HMM to simulate the Bayesian posterior probabilities encountered at each step in a Viterbi graph. We prefer this since the environment is only partially observable: we only have bare knowledge of the minimum card distribution. Plans are constructed piecewise; since Blackjack is a three-state game with two kill-states in "stand" and "double," there is only one "true" action state--"hit".
