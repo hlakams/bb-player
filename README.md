@@ -1,6 +1,6 @@
 # BB-Player
 A HMM strategy for Blackjack
-> Harsha Lakamsani and Nicholas Ngo, November 2022
+> November 2022
 
 # Introduction
 To the lay gambler or even advanced players, card counting is an optimal strategy for blackjack. No sleight of hand: it depends on what you know about the shuffled deck as it's being played. The core heuristic is partially informed and weights specific likelihoods over others. Let's take it one step further. The deck is no longer uniformly distributed. There are still four suits, albeit lacking the guarantee of 13 cards each. Each rank will have at least one card. On top of that, you don't know how many decks are in play. Will your naive strategy still work?
