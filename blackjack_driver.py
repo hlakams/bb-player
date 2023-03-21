@@ -4,9 +4,8 @@ import attendant
 import benchmark
 import bb_player
 
-# # FINAL
-# # real agents in test
-names = ["bb", "random", "hi_lo", "ko", "zen", "ten", "halves", "uston"]
+# alias for agent names
+names = attendant.names
 
 # maintain running count of results
 results = [["", 0, 0, 0, 0, 0.0, 0.0] for _ in names]
@@ -34,19 +33,26 @@ for batch_no in range(batch_runs):
         losses = 0
         draws = 0
         games = 100
-
+        
+        # special case for bb-player: update HMM vars
         if name == "bb":
+            # transition matrix
             benchmark.transitions = bb_player.init_transitions()
+            # emissions matrix
             benchmark.emissions = bb_player.init_emissions()
-
+        
+        # action procedures for all games
         for game in range(games):
+            # resample deck distribution
             shuffled_deck = dealer.shuffle_deck(deck)
-
+            # subsample of drawn deck
             shoe = dealer.draw_shoe(shuffled_deck)
-
+            # conduct a new game and memoize result
             result = attendant.basic_game(shoe, wager, name)
 
+            # decompose the result tuple
             [winning_hand, wager_outcome, status] = result
+            # update running balance for agent
             balance += wager_outcome
 
             # loss
@@ -66,7 +72,7 @@ for batch_no in range(batch_runs):
         current_result = [name, games, wins, losses, draws, win_likelhood, balance]
         # previous (running) result
         previous_result = results[name_idx]
-
+        # strategy contents updated with benchmark result
         results[name_idx] = benchmark.update_results(previous_result, current_result, batch_no)
 
 print(results)
