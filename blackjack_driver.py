@@ -3,7 +3,6 @@ import dealer
 import attendant
 import benchmark
 import bb_player
-# import plotter
 
 # external libraries
 import warnings
@@ -103,9 +102,6 @@ for batch_no in range(batch_runs):
 
 # show results
 print(results)
-
-# # show plot of running balance
-# plotter.plot_running_balance(df_balance, names)
 
 # save running balance df
 df_balance.to_csv('running_balance.csv')
