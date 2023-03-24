@@ -17,7 +17,7 @@ warnings.filterwarnings(action='ignore', category=pd.errors.PerformanceWarning)
 names = attendant.names
 
 # maintain running count of results
-results = [["", 0, 0, 0, 0, 0.0, 0.0] for _ in names]
+results = [["", 0, 0, 0, 0, 0.0, 0.0, 0.0] for _ in names]
 
 # maximum batch, game runs
 batch_runs = 10
@@ -25,9 +25,11 @@ num_games = 100
 
 # base balance
 base_balance = 1000.00
+balance = base_balance
 
 # initialize dataframe
 df_balance = pd.DataFrame(0, index=range(batch_runs * num_games), columns=names)
+df_batch_balance = pd.DataFrame(0, index=range(batch_runs * num_games), columns=names)
 
 # play some games of blackjack
 # play this many batches of games (new deck for each batch)
@@ -44,7 +46,9 @@ for batch_no in range(batch_runs):
         print(f"Playing agent {name}, batch #{batch_no}")
 
         # base wager as a decimal float
-        balance = base_balance
+        # Note: toggle balance/batch_balance for batch-based/continuous results
+        # balance = base_balance
+        batch_balance = base_balance
         wager = 10.00
 
         # keep track of game results
@@ -72,9 +76,11 @@ for batch_no in range(batch_runs):
             [winning_hand, wager_outcome, status] = result
             # update running balance for agent
             balance += wager_outcome
+            batch_balance += wager_outcome
 
             # add current balacne multiplier to running df
             df_balance.loc[(batch_no - 1) * num_games + game, name] = balance / base_balance
+            df_batch_balance.loc[(batch_no - 1) * num_games + game, name] = batch_balance / base_balance
 
             # loss
             if status == 4:
@@ -90,7 +96,7 @@ for batch_no in range(batch_runs):
         win_likelhood = (2 * wins + draws) / (2 * num_games)
 
         # store result
-        current_result = [name, num_games, wins, losses, draws, win_likelhood, balance]
+        current_result = [name, num_games, wins, losses, draws, win_likelhood, balance, batch_balance]
         # previous (running) result
         previous_result = results[name_idx]
         # strategy contents updated with benchmark result
@@ -101,10 +107,12 @@ for batch_no in range(batch_runs):
 
 
 # save running balance df
-df_results = pd.DataFrame(results, columns=['name', 'num_games', 'wins', 'losses', 'draws', 'win_likelhood', 'balance'])
+df_results = pd.DataFrame(results, columns=['name', 'num_games', 'wins', 'losses', 'draws', 'win_likelhood', 'balance', 'batch_balance'])
+df_results['batch_balance'] = df_results['batch_balance'] / batch_runs
 df_results.to_csv('results.csv')
-# save running balance df
+# save running balance dfs
 df_balance.to_csv('running_balance.csv')
+df_batch_balance.to_csv('batch_balance.csv')
 
 # show results
 display(df_results)

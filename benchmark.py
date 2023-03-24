@@ -29,7 +29,9 @@ def update_results(previous_result: list, current_result: list, batch_no: int) -
             # win likelihood update
             win_likelihood_update(previous_result[5], current_result[5], batch_no),
             # new balance
-            current_result[6]
+            current_result[6],
+            # batch balance
+            previous_result[7] + current_result[7]
         ]
 
 def blackjack_sum(hand: list[int]) -> int:
