@@ -3,6 +3,7 @@ import dealer
 import attendant
 import benchmark
 import bb_player
+from IPython.display import display
 
 # external libraries
 import warnings
@@ -95,13 +96,15 @@ for batch_no in range(batch_runs):
         # strategy contents updated with benchmark result
         results[name_idx] = benchmark.update_results(previous_result, current_result, batch_no)
 
-        print(df_balance.head())
-
     # newline for console formatting
     print('\n')
 
-# show results
-print(results)
 
 # save running balance df
+df_results = pd.DataFrame(results, columns=['name', 'num_games', 'wins', 'losses', 'draws', 'win_likelhood', 'balance'])
+df_results.to_csv('results.csv')
+# save running balance df
 df_balance.to_csv('running_balance.csv')
+
+# show results
+display(df_results)
