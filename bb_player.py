@@ -94,8 +94,8 @@ def sample_string(distribution: list[int]) -> str:
     # convert set to normal distribution
     mean = np.mean(occurrences)
     stdev = np.std(occurrences)
-    # normal = stats.norm(mean, stdev)
-    normal = stats.lognorm(s=stdev, scale=math.exp(mean))
+    normal = stats.norm(mean, stdev)
+    # normal = stats.lognorm(s=stdev, scale=math.exp(mean))
 
     # generate a sample of int values in range [0,13]
     sample = normal.rvs(1000)
