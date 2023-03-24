@@ -25,7 +25,7 @@ num_games = 100
 
 # base balance
 base_balance = 1000.00
-balance = base_balance
+balance = [base_balance for _ in names]
 
 # initialize dataframe
 df_balance = pd.DataFrame(0, index=range(batch_runs * num_games), columns=names)
@@ -75,11 +75,11 @@ for batch_no in range(batch_runs):
             # decompose the result tuple
             [winning_hand, wager_outcome, status] = result
             # update running balance for agent
-            balance += wager_outcome
+            balance[name_idx] += wager_outcome
             batch_balance += wager_outcome
 
-            # add current balacne multiplier to running df
-            df_balance.loc[(batch_no - 1) * num_games + game, name] = balance / base_balance
+            # add current balance multiplier to running df
+            df_balance.loc[(batch_no - 1) * num_games + game, name] = balance[name_idx]
             df_batch_balance.loc[(batch_no - 1) * num_games + game, name] = batch_balance / base_balance
 
             # loss
@@ -96,7 +96,7 @@ for batch_no in range(batch_runs):
         win_likelhood = (2 * wins + draws) / (2 * num_games)
 
         # store result
-        current_result = [name, num_games, wins, losses, draws, win_likelhood, balance, batch_balance]
+        current_result = [name, num_games, wins, losses, draws, win_likelhood, balance[name_idx], batch_balance]
         # previous (running) result
         previous_result = results[name_idx]
         # strategy contents updated with benchmark result
