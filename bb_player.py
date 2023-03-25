@@ -94,8 +94,10 @@ def sample_string(distribution: list[int]) -> str:
     # convert set to normal distribution
     mean = np.mean(occurrences)
     stdev = np.std(occurrences)
-    normal = stats.norm(mean, stdev)
-    # normal = stats.lognorm(s=stdev, scale=math.exp(mean))
+
+    # normalization of the observed distribution
+    # normal = stats.norm(mean, stdev)
+    normal = stats.lognorm(s=stdev, scale=math.exp(mean))
 
     # generate a sample of int values in range [0,13]
     sample = normal.rvs(1000)
@@ -110,6 +112,10 @@ def sample_string(distribution: list[int]) -> str:
             output.append(int(value))
         if len(output) == 10:
             break
+
+    # # alternatively, random sample from standardized categorical distribution
+    # norm_dist = [x / sum(distribution) for x in distribution]
+    # output = np.random.choice([x for x in range(len(distribution))], size = 10, p = norm_dist)
 
     # done with current sample
     return output
