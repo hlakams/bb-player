@@ -3,6 +3,7 @@ import secrets
 import ccount_agent
 import benchmark
 import bb_player
+import numpy as np
 
 """
 The attendant draws cards and verifies hands
@@ -129,8 +130,10 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                 for card in player_hand:
                     count += ccount_agent.ccount(name, card)
                 # assumed "house" hand
-                for card in house_hand:
+                for card in house_hand[1:]:
                     count += ccount_agent.ccount(name, card)
+                # account for other card
+                ccount_agent.ccount(name, np.random.randint(13))
 
                 # figure out action
                 action_status = ccount_agent.ccount_action(state, count)
@@ -167,7 +170,7 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                 for card in player_hand:
                     base_distribution = bb_player.update_distribution(base_distribution, card)
                 # update distribution with assumed house hand
-                for card in house_hand:
+                for card in house_hand[1:]:
                     base_distribution = bb_player.update_distribution(base_distribution, card)
                 # get step from current tree level
                 [action_status, transitions, emissions] = bb_player.action_tree_step(transitions, emissions, player_hand, state, base_distribution)
