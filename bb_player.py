@@ -51,8 +51,8 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
         # decrement new hits
         medium = random.randint(4,8)
         high = random.randint(9,12)
-        base_distribution[medium] -= 1
-        base_distribution[high] -= 1
+        if base_distribution[medium] > 0: base_distribution[medium] -= 1
+        if base_distribution[high] > 0: base_distribution[high] -= 1
     # medium
     elif observed in range(4, 9):
         # increment hits
@@ -63,8 +63,8 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
         # decrement new hits
         low = random.randint(0,3)
         high = random.randint(9,12)
-        base_distribution[low] -= 1
-        base_distribution[high] -= 1
+        if base_distribution[low] > 0: base_distribution[low] -= 1
+        if base_distribution[high] > 0: base_distribution[high] -= 1
     # high
     elif observed is range(9, 13):
         # increment hits
@@ -75,8 +75,8 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
         # decrement new hits
         low = range(0,3)
         high = random.randint(4,8)
-        base_distribution[low] -= 1
-        base_distribution[medium] -= 1
+        if base_distribution[low] > 0: base_distribution[low] -= 1
+        if base_distribution[medium] > 0 : base_distribution[medium] -= 1
     
     return base_distribution
 
@@ -84,38 +84,38 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
 # sample a string from a normalized distribution - "gaussian filter"
 def sample_string(distribution: list[int]) -> str:
     # convert base distribution to a set of values
-    occurrences = []
+    # occurrences = []
 
-    # add values to set
-    for idx, hits in enumerate(distribution):
-        for _ in range(hits):
-            occurrences.append(idx)
+    # # add values to set
+    # for idx, hits in enumerate(distribution):
+    #     for _ in range(hits):
+    #         occurrences.append(idx)
     
-    # convert set to normal distribution
-    mean = np.mean(occurrences)
-    stdev = np.std(occurrences)
+    # # convert set to normal distribution
+    # mean = np.mean(occurrences)
+    # stdev = np.std(occurrences)
 
-    # normalization of the observed distribution
+    # # normalization of the observed distribution
     # normal = stats.norm(mean, stdev)
-    normal = stats.lognorm(s=stdev, scale=math.exp(mean))
+    # # normal = stats.lognorm(s=stdev, scale=math.exp(mean))
 
-    # generate a sample of int values in range [0,13]
-    sample = normal.rvs(1000)
-    sample = np.round(sample)
+    # # generate a sample of int values in range [0,13]
+    # sample = normal.rvs(1000)
+    # sample = np.round(sample)
 
-    # filter output to acceptable range
-    output = []
-    # max 10 values
+    # # filter output to acceptable range
+    # output = []
+    # # max 10 values
 
-    for value in sample:
-        if value >= 0 and value <= 12:
-            output.append(int(value))
-        if len(output) == 10:
-            break
+    # for value in sample:
+    #     if value >= 0 and value <= 12:
+    #         output.append(int(value))
+    #     if len(output) == 10:
+    #         break
 
-    # # alternatively, random sample from standardized categorical distribution
-    # norm_dist = [x / sum(distribution) for x in distribution]
-    # output = np.random.choice([x for x in range(len(distribution))], size = 10, p = norm_dist)
+    # alternatively, random sample from standardized categorical distribution
+    norm_dist = [x / sum(distribution) for x in distribution]
+    output = np.random.choice([x for x in range(len(distribution))], size = 10, p = norm_dist)
 
     # done with current sample
     return output
