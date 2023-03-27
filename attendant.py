@@ -133,7 +133,7 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                 for card in house_hand[1:]:
                     count += ccount_agent.ccount(name, card)
                 # account for other card
-                ccount_agent.ccount(name, np.random.randint(13))
+                # ccount_agent.ccount(name, np.abs(6 - house_hand[1]))
 
                 # figure out action
                 action_status = ccount_agent.ccount_action(state, count)
