@@ -2,6 +2,12 @@
 import dealer
 import attendant
 
+# library imports
+import warnings
+
+# silence misc warnings
+warnings.filterwarnings(action='ignore', category=RuntimeWarning)
+
 # initialize deck
 deck = dealer.generate_deck_distribution()
 shuffled_deck = dealer.shuffle_deck(deck)
@@ -18,12 +24,12 @@ draws = 0
 games = 100
 
 # strategy/agent to run
-name = "random"
+name = "bb"
 
 # play some games of blackjack
 for game in range(games):
     # play game
-    [winning_hand, wager_outcome, status] = attendant.basic_game(shoe, wager, "bb")
+    [winning_hand, wager_outcome, status] = attendant.basic_game(shoe, wager, name)
     balance += wager_outcome
 
     # loss
