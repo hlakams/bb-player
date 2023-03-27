@@ -83,7 +83,7 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
 # integrate sample to feed into Viterbi
 # sample a string from a normalized distribution - "gaussian filter"
 def sample_string(distribution: list[int]) -> str:
-    # convert base distribution to a set of values
+    # # convert base distribution to a set of values
     # occurrences = []
 
     # # add values to set
@@ -96,8 +96,8 @@ def sample_string(distribution: list[int]) -> str:
     # stdev = np.std(occurrences)
 
     # # normalization of the observed distribution
-    # normal = stats.norm(mean, stdev)
-    # # normal = stats.lognorm(s=stdev, scale=math.exp(mean))
+    # # normal = stats.norm(mean, stdev)
+    # normal = stats.lognorm(s=stdev, scale=math.exp(mean))
 
     # # generate a sample of int values in range [0,13]
     # sample = normal.rvs(1000)
@@ -116,6 +116,11 @@ def sample_string(distribution: list[int]) -> str:
     # alternatively, random sample from standardized categorical distribution
     norm_dist = [x / sum(distribution) for x in distribution]
     output = np.random.choice([x for x in range(len(distribution))], size = 10, p = norm_dist)
+
+    # # (deprecated) or, interpret categorical as discrete numerical -> poisson distribution
+    # norm_dist = [x / sum(distribution) for x in distribution]
+    # poisson_base = stats.rv_discrete(name='poisson_base', values=(range(13), norm_dist))
+    # output = poisson_base.rvs(size=10)
 
     # done with current sample
     return output
