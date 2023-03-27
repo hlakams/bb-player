@@ -51,8 +51,8 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
         # decrement new hits
         medium = random.randint(4,8)
         high = random.randint(9,12)
-        base_distribution[medium] += 1
-        base_distribution[high] += 1
+        base_distribution[medium] -= 1
+        base_distribution[high] -= 1
     # medium
     elif observed in range(4, 9):
         # increment hits
@@ -63,8 +63,8 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
         # decrement new hits
         low = random.randint(0,3)
         high = random.randint(9,12)
-        base_distribution[low] += 1
-        base_distribution[high] += 1
+        base_distribution[low] -= 1
+        base_distribution[high] -= 1
     # high
     elif observed is range(9, 13):
         # increment hits
@@ -75,8 +75,8 @@ def update_distribution(base_distribution: list[int], observed: int) -> list[int
         # decrement new hits
         low = range(0,3)
         high = random.randint(4,8)
-        base_distribution[low] += 1
-        base_distribution[medium] += 1
+        base_distribution[low] -= 1
+        base_distribution[medium] -= 1
     
     return base_distribution
 
