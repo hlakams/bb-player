@@ -36,8 +36,8 @@ def update_results(previous_result: list, current_result: list, batch_no: int) -
 
 def blackjack_sum(hand: list[int]) -> int:
     # indexing starts from 0 (ace)
-    # face cards are indexed at value - 1
-    # court cards are indices 10 - 12, value 10
+    # numbered cards are indexed at value - 1
+    # court/face cards are indices 10 - 12, value 10
     blackjack_dict = dict([
         (0, 1),
         (1, 2),
@@ -55,10 +55,27 @@ def blackjack_sum(hand: list[int]) -> int:
     ])
     # running sum
     hand_sum = 0
+    # aces in the deck
+    aces = 0
 
     # iterate over all cards
     for card in hand:
-        hand_sum += blackjack_dict.get(card)
+        # encountered an ace, save it for later
+        if card == 0:
+            aces += 1
+        # add value to hand sum
+        else:
+            hand_sum += blackjack_dict.get(card)
+    
+    # base case, check if sole ace satisfies win condition
+    while aces > 1:
+        hand_sum += 1
+        aces -= 1
+    
+    if hand_sum + 11 == 21:
+        hand_sum += 11
+    else:
+        hand_sum += 1
     
     # done with sum
     return hand_sum
