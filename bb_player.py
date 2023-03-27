@@ -242,14 +242,14 @@ def action_tree_step(transitions: Mapping, emissions: Mapping, current_hand: lis
 
     # posssible_actions: 7, 8, 9
     if game_state == 1:
-        if symbol_distance >= 0 and symbol_distance <= 1:
+        if symbol_distance >= 0 and symbol_distance <= 2:
             action_status = 8
-        elif symbol_distance > 1 and symbol_distance <= 1.5:
+        elif symbol_distance > 2 and symbol_distance <= 4:
             action_status = 9
         else:
             action_status = 7
     else:
-        if symbol_distance >= 0 and symbol_distance <= 1:
+        if symbol_distance >= 0 and symbol_distance <= 2:
             action_status = 8
         else:
             action_status = 7
