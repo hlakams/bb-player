@@ -20,7 +20,6 @@ hi_lo_dict = dict([
     (11, -1),
     (12, -1)
 ])
-# level 1
 ko_dict = dict([
     (0, -1),
     (1, 1),
@@ -118,7 +117,11 @@ def ccount(name: str, value: int) -> float:
         return halves_dict.get(value)
     elif name == "uston":
         return uston_dict.get(value)
+    # invalid input
+    else:
+        raise Exception("Invalid card-counting method provided!")
 
+# a state-based weighted card-counting action heuristic
 def ccount_action(state: int, count: float):
     if state == 1 and count > (26/4):
         return 9
