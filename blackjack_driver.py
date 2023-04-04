@@ -31,6 +31,12 @@ balance = [base_balance for _ in names]
 df_balance = pd.DataFrame(0, index=range(batch_runs * num_games), columns=names)
 df_batch_balance = pd.DataFrame(0, index=range(batch_runs * num_games), columns=names)
 
+# toggle on for long-term forecasting
+# # transition matrix
+# benchmark.transitions = bb_player.init_transitions()
+# # emissions matrix
+# benchmark.emissions = bb_player.init_emissions()
+
 # play some games of blackjack
 # play this many batches of games (new deck for each batch)
 for batch_no in range(batch_runs):
@@ -57,6 +63,7 @@ for batch_no in range(batch_runs):
         draws = 0
         
         # special case for bb-player: update HMM vars
+        # (toggle off for long-term forecasting)
         if name == "bb":
             # transition matrix
             benchmark.transitions = bb_player.init_transitions()
