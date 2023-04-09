@@ -91,7 +91,7 @@ def winner(player_hand: list[int], wager: float, state: int) -> list[list[int], 
         return [player_hand, 1.5 * wager, 5]
     # standard win, 1:1 odds
     else:
-        return [player_hand, wager, 5]
+        return [player_hand, 1.0 * wager, 5]
 
 # status code 6 is a draw
 def draw(player_hand: list[int], wager: float) -> list[list[int], float, int]:
