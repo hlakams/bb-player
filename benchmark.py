@@ -67,15 +67,16 @@ def blackjack_sum(hand: list[int]) -> int:
         else:
             hand_sum += blackjack_dict.get(card)
     
-    # base case, check if sole ace satisfies win condition
-    while aces > 1:
-        hand_sum += 1
-        aces -= 1
-    
-    if hand_sum + 11 == 21:
-        hand_sum += 11
-    else:
-        hand_sum += 1
+    if aces > 1:
+        # base case, check if sole ace satisfies win condition
+        while aces > 1:
+            hand_sum += 1
+            aces -= 1
+        
+        if hand_sum + 11 == 21:
+            hand_sum += 11
+        else:
+            hand_sum += 1
     
     # done with sum
     return hand_sum

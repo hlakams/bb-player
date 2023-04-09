@@ -81,9 +81,17 @@ def loser(winning_hand: list[int], wager: float) -> list[list[int], float, int]:
     return [winning_hand, -1.0 * wager, 4]
 
 # status code 5 is winner
-def winner(player_hand: list[int], wager: float) -> list[list[int], float, int]:
-    # winning hand, gain 1.5x wager
-    return [player_hand, 1.5 * wager, 5]
+def winner(player_hand: list[int], wager: float, state: int) -> list[list[int], float, int]:
+    # get hand sum
+    hand_sum = benchmark.blackjack_sum(player_hand)
+    
+    # check if blackjack win (initial state)
+    if hand_sum == 21 and state == 0:
+        # blackjack hand, 3:2 odds
+        return [player_hand, 1.5 * wager, 5]
+    # standard win, 1:1 odds
+    else:
+        return [player_hand, wager, 5]
 
 # status code 6 is a draw
 def draw(player_hand: list[int], wager: float) -> list[list[int], float, int]:
@@ -106,7 +114,37 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
     # first deal, 2 cards each
     for _ in range(2):
         [shoe, player_hand] = draw_card(shoe, player_hand)
+    for _ in range(2):
         [shoe, house_hand] = draw_card(shoe, house_hand)
+    
+    # get initial game state status
+    house_init_status = verify(house_hand)
+    player_init_status = verify(player_hand)
+
+    # house has blackjack
+    if house_init_status == 2:
+        # player also has blackjack, draw
+        if player_init_status == 2:
+            return winner(player_hand, wager, 0)
+        # player loses
+        else:
+            return loser(house_hand, wager)
+    # house bust
+    elif house_init_status == 3:
+        # player bust, loses
+        if player_init_status == 3:
+            return loser(house_hand, wager)
+        # player wins
+        else:
+            return winner(player_hand, wager, 0)
+    # house policy still allows hits
+    else:
+        # player wins on blackjack
+        if player_init_status == 2:
+            return winner(player_hand, wager, 0)
+        # player bust
+        elif player_init_status == 3:
+            return loser(house_hand, wager)
 
     # keep track of game state
     state = 0
@@ -120,6 +158,21 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
     while True:
         # new state
         state += 1
+
+        # check if the current house hand falls under certain conditions
+        if state > 1:
+            # get house pre-status
+            house_pre_status = verify(house_hand)
+            # hosue draws new card if allowed by static policy
+            if house_pre_status == 0:
+                # house draw
+                [shoe, house_hand] = draw_card(shoe, house_hand)
+
+            # get house post-status
+            house_post_status = verify(house_hand)
+            # house has 21 on a non-initial state, so they win
+            if house_post_status == 3:
+                return loser(house_hand, wager)
         
         # post-initial
         if state == 1:
@@ -221,8 +274,6 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
                     [shoe, player_hand] = draw_card(shoe, player_hand)
                     base_distribution = bb_player.update_distribution(base_distribution, player_hand[-1])
 
-        # house draw
-        [shoe, house_hand] = draw_card(shoe, house_hand)
 
         # get game state status
         house_status = verify(house_hand)
@@ -231,58 +282,94 @@ def basic_game(shoe: list[int], wager: float, name: str) -> list[list[int], floa
         house_sum = benchmark.blackjack_sum(house_hand)
         player_sum = benchmark.blackjack_sum(player_hand)
 
-        # house hand is playable
-        if house_status == 0:
-            # check if player hand is playable
-            if player_status < 2:
-                # do nothing, go to action
-                continue
-            # check if player has blackjack
-            elif player_status == 2:
-                # winner!
-                return winner(player_hand, wager)
-            # player lost
-            else:
-                # loser :(
-                return loser(house_hand, wager)
-
-        # house hand is >= 17 but not >= 21; end gameplay
-        elif house_status == 1:
-            # check if player hand is playable
-            if player_status == 1:
-                # check if house won
-                if house_sum > player_sum:
-                    # loser :(
+        # player hits
+        if action_status == 7:
+            # house hand is >= 17 but not >= 21; end gameplay
+            if house_status == 1:
+                # check if player hand is playable
+                if player_status == 1:
+                    # check if house won
+                    if house_sum > player_sum:
+                        return loser(house_hand, wager)
+                    # check if player won
+                    elif house_sum < player_sum:
+                        return winner(player_hand, wager, state)
+                    # draw
+                    else:
+                        return draw(player_hand, wager)
+                # check if player has a winning hand
+                elif player_status == 2:
+                    return winner(player_hand, wager, state)
+                # player lost
+                elif player_status == 3:
                     return loser(house_hand, wager)
-                # check if player won
-                elif house_sum < player_sum:
-                    # winner!
-                    return winner(player_hand, wager)
-                # draw
-                else:
+                
+            # house hand has a winning hand
+            elif house_status == 2:
+                # draw, player also has a winning hand
+                if player_status == 2:
                     return draw(player_hand, wager)
-            # check if player has blackjack
-            elif player_status == 2:
-                # winner!
-                return winner(player_hand, wager)
-            # player lost
+                # loser
+                else:
+                    return loser(house_hand, wager)
+            # house hand has a winning hand
+            elif house_status == 3:
+                # player loses with a bust hand too
+                if player_status == 3:
+                    return loser(house_hand, wager)
+                # player wins
+                else:
+                    return winner(player_hand, wager, state)
+                        # house hand is playable
+            # house can still play
             else:
-                # loser :(
-                return loser(house_hand, wager)
-            
-        # house hand is blackjack
-        elif house_status == 2:
-            # draw, player also has blackjack
-            if player_status == 2:
-                return winner(player_hand, wager)
-            # loser :(
-            else:
-                return loser(house_hand, wager)
-        # house went bust
+                # check if player has a winning hand
+                if player_status == 2:
+                    return winner(player_hand, wager, state)
+                # player lost
+                elif player_status == 3:
+                    return loser(house_hand, wager)
+
+        # player stands or doubles: conditionals based on wins by player
+        # we also check for house bust beforehand, and house plays until sum >= 17
         else:
-            # draw, player also went bust
-            if player_status == 3:
-                return draw(player_hand, wager)
-            # winner! any value that isn't a bust
+            # house has stopped hitting
+            if house_status == 1:
+                # player in same sum interval
+                if player_status <= 2:
+                    # same sum, draw
+                    if player_sum == house_sum:
+                        return draw(player_hand, wager)
+                    # player sum is greater but non-bust, win by default
+                    elif player_sum > house_sum:
+                        return winner(player_hand, wager, state)
+                    # player sum less than house, they lose
+                    else:
+                        return loser(house_hand, wager)
+                # player cannot make any more moves, so they lose
+                else:
+                    return loser(house_hand, wager)
+            # house has a winning hand
+            elif house_status == 2:
+                # player has a winning hand
+                if player_status == 2:
+                    return draw(player_hand, wager)
+                # player loses otherwise
+                else:
+                    return loser(house_hand, wager)
+            # house bust
+            elif house_status == 3:
+                # player also bust, loses
+                if player_status == 3:
+                    return loser(player_hand, wager)
+                # player winner by default
+                else:
+                    return winner(player_hand, wager, state)
+            # house can still play
             else:
-                return winner(player_hand, wager)
+                # player has winning hand
+                if player_status == 2:
+                    return winner(player_hand, wager, state)
+                # player bust
+                elif player_status == 3:
+                    return loser(house_hand, wager)

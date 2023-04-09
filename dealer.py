@@ -66,7 +66,13 @@ def sample_deck_distribution(deck: list[int], sample_size: int) -> list[int]:
 # shuffle the generated deck
 def shuffle_deck(deck: list[int]) -> list[int]:
     # deck basis (13 card types, 4 each in base)
-    shuffled_deck = sample_deck_distribution(deck, 52)
+    current_deck = sample_deck_distribution(deck, 52)
+    shuffled_deck = []
+
+    while len(current_deck) > 0:
+        picked_item = secrets.choice(current_deck)
+        shuffled_deck.append(picked_item)
+        current_deck.remove(picked_item)
     
     # deck is shuffled
     return shuffled_deck
